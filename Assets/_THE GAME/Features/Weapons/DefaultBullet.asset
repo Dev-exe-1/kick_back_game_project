@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f96382968304c0a4080da690392ecf6d, type: 3}
+  m_Name: DefaultBullet
+  m_EditorClassIdentifier: Assembly-CSharp::Features.Weapons.Data.ProjectileData
+  prefab: {fileID: 4955804395437242890, guid: 8663765cfb5c4a646bfd6338a742da5e, type: 3}
+  speed: 6
+  lifetime: 5
+  hitEffectPrefab: {fileID: 7833005410288097199, guid: ea11d7e39b42f18459463e1f8e3381be, type: 3}
+  hittableLayers:
+    serializedVersion: 2
+    m_Bits: 192
+  linearDrag: 0
