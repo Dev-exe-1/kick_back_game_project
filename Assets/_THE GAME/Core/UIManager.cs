@@ -44,6 +44,7 @@ namespace UI
 
         private void Start()
         {
+            Application.targetFrameRate = 60;
             if (GameManager.Instance != null)
             {
                 Debug.Log($"[UIManager] Start() Polling GameManager. Found State: {GameManager.Instance.CurrentState}");
