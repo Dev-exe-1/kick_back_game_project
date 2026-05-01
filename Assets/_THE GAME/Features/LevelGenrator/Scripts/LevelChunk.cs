@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Features.Level.Scripts
+namespace Features.LevelGenerator.Scripts
 {
     /// <summary>
     /// Represents a single piece of the infinite level.

@@ -46,7 +46,7 @@ namespace Features.Weapons.Scripts
         private IEnumerator LifetimeRoutine()
         {
             yield return new WaitForSeconds(_data.lifetime);
-            // ReturnToPool();
+            ReturnToPool();
         }
 
         private void OnTriggerEnter2D(Collider2D collision)

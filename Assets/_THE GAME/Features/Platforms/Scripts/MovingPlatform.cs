@@ -19,13 +19,15 @@ namespace Features.Platforms.Scripts
 
         private void Update()
         {
+            if (Core.GameManager.Instance == null || Core.GameManager.Instance.CurrentState != Core.GameState.Playing) return;
             CheckForWalls();
             Move();
         }
 
         private void Move()
         {
-            transform.Translate(Vector2.right * _direction * _speed * Time.deltaTime);
+            float currentSpeed = _speed * Core.DifficultyManager.GlobalSpeedMultiplier;
+            transform.Translate(Vector2.right * _direction * currentSpeed * Time.deltaTime);
         }
 
         private void CheckForWalls()

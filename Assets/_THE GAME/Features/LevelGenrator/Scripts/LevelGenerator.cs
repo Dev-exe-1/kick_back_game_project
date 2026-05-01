@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Core;
 
-namespace Features.Level.Scripts
+namespace Features.LevelGenerator.Scripts
 {
     /// <summary>
     /// Manages the infinite generation and pooling of vertical level chunks.

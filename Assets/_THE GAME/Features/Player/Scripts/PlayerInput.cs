@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Core;
 
 namespace Features.Player.Scripts
 {
-    using Core;
     using Camera = UnityEngine.Camera;
     public class PlayerInput : MonoBehaviour
     {
+
         private Camera _mainCamera;
 
         // This requires you to check "Generate C# Class" on your Input Action Asset,
@@ -18,25 +19,24 @@ namespace Features.Player.Scripts
             _mainCamera = Camera.main;
 
             _controls = new PlayerControls();
-
-            // ATOMIC FIRE BINDING: Hook into 'performed' to guarantee immediate execution.
-            // This happens before Update(), ensuring we don't shoot with a stale frame's aim.
-            _controls.Player.Fire.performed += OnFirePerformed;
         }
 
         private void OnEnable()
         {
             _controls.Enable();
+            // ATOMIC FIRE BINDING: Hook into 'performed' to guarantee immediate execution.
+            // This happens before Update(), ensuring we don't shoot with a stale frame's aim.
+            _controls.Player.Fire.performed += OnFirePerformed;
         }
 
         private void OnDisable()
         {
+            _controls.Player.Fire.performed -= OnFirePerformed;
             _controls.Disable();
         }
 
         private void OnDestroy()
         {
-            _controls.Player.Fire.performed -= OnFirePerformed;
             _controls.Dispose();
         }
 

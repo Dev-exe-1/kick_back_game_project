@@ -171,6 +171,7 @@ GameObject:
   - component: {fileID: 6514151664650767584}
   - component: {fileID: 3841447074555015083}
   - component: {fileID: 254468255801057626}
+  - component: {fileID: 8054217769096282399}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -383,6 +384,18 @@ MonoBehaviour:
   _stats: {fileID: 11400000, guid: 183f349a6c084aa4ba5299161c5e8f65, type: 2}
   _projectileData: {fileID: 11400000, guid: a07ce304fe0675e44b0fddf6efa75b11, type: 2}
   _firePoint: {fileID: 4791429653130522808}
+--- !u!114 &8054217769096282399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2157603496810532126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7fd6f3292de84046b6d4a7962fc62f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player.PlayerHeightTracker
 --- !u!1 &2229349607258652886
 GameObject:
   m_ObjectHideFlags: 0

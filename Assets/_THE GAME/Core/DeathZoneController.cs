@@ -1,7 +1,5 @@
 using UnityEngine;
 using Features.Player.Scripts;
-using Core; // تأكد من استيراد المسار الخاص باللاعب
-
 
 namespace Core
 {
@@ -13,6 +11,7 @@ namespace Core
 
         private void Update()
         {
+            if (GameManager.Instance == null || GameManager.Instance.CurrentState != GameState.Playing) return;
             if (_cameraTransform == null) return;
 
             float targetY = _cameraTransform.position.y + _yOffset;
@@ -36,9 +35,6 @@ namespace Core
         {
             Debug.Log("<color=red>💀 Game Over </color>");
             GameEvents.RaisePlayerDeath();
-            // هنا يمكنك استدعاء حدث (Event) أو تعطيل اللاعب
-            playerObj.SetActive(false);
-
         }
     }
 }

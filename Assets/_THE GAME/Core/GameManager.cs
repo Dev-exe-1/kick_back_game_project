@@ -138,6 +138,49 @@ namespace Core
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
+        /// <summary>
+        /// Toggles the game between Playing and Paused states.
+        /// </summary>
+        public void TogglePause()
+        {
+            if (CurrentState == GameState.Playing)
+            {
+                Time.timeScale = 0f;
+                UpdateState(GameState.Paused);
+                GameEvents.RaiseGamePaused();
+            }
+            else if (CurrentState == GameState.Paused)
+            {
+                Time.timeScale = 1f;
+                UpdateState(GameState.Playing);
+                GameEvents.RaiseGameResumed();
+            }
+        }
+
+        /// <summary>
+        /// Initiates a new game loop without needing a scene reload.
+        /// </summary>
+        public void StartNewGame()
+        {
+            Debug.Log("[GameManager] StartNewGame initiated.");
+            Time.timeScale = 1f;
+            
+            // Fire event to decouple resetting logic (Score, Difficulty, Obstacles, Player)
+            GameEvents.RaiseGameReset();
+            
+            UpdateState(GameState.Playing);
+        }
+
+        /// <summary>
+        /// Safely returns the player to the main menu.
+        /// </summary>
+        public void ReturnToMainMenu()
+        {
+            Debug.Log("[GameManager] Returning to Main Menu.");
+            Time.timeScale = 1f;
+            UpdateState(GameState.MainMenu);
+        }
+
         private void OnDestroy()
         {
             // Ensure static events are cleared on scene reload to prevent Ghost Listeners!

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6e08a88b95b6334c84a237ae961458d, type: 3}
   m_Name: DefaultPlayer
   m_EditorClassIdentifier: Assembly-CSharp::Features.Player.Data.PlayerStats
-  recoilForce: 14
+  recoilForce: 12.5
   maxAirShots: 1
   groundLayer:
     serializedVersion: 2

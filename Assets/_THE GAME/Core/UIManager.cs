@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Core; // To access GameManager and GameState
-
+using TMPro;
 namespace UI
 {
     /// <summary>
@@ -14,21 +14,36 @@ namespace UI
         [SerializeField] private CanvasGroup startMenu;
         [SerializeField] private CanvasGroup hudPanel;
         [SerializeField] private CanvasGroup gameOverMenu;
+        [SerializeField] private CanvasGroup pausePanel;
 
         [Header("Settings")]
         [Tooltip("Delay in seconds before showing the Game Over screen after death.")]
         [SerializeField] private float gameOverDelay = 1.0f;
 
+        [Header("UI Elements")]
+        [SerializeField] private TextMeshProUGUI scoreText;
+        [SerializeField] private TextMeshProUGUI currentScoreTextGameOver;
+        [SerializeField] private TextMeshProUGUI highScoreTextGameOver;
+
+        [Header("Audio")]
+        [SerializeField] private AudioClip buttonClickClip;
+
         private void OnEnable()
         {
             // Subscribe to global state changes
             GameManager.OnStateChanged += HandleGameStateChanged;
+            GameEvents.OnScoreChanged += UpdateScoreDisplay;
+            GameEvents.OnGamePaused += HandleGamePaused;
+            GameEvents.OnGameResumed += HandleGameResumed;
         }
 
         private void OnDisable()
         {
             // Always unsubscribe to prevent memory leaks!
             GameManager.OnStateChanged -= HandleGameStateChanged;
+            GameEvents.OnScoreChanged -= UpdateScoreDisplay;
+            GameEvents.OnGamePaused -= HandleGamePaused;
+            GameEvents.OnGameResumed -= HandleGameResumed;
         }
 
         private void Start()
@@ -46,6 +61,7 @@ namespace UI
                 SetCanvasGroupState(startMenu, true);
                 SetCanvasGroupState(hudPanel, false);
                 SetCanvasGroupState(gameOverMenu, false);
+                SetCanvasGroupState(pausePanel, false);
             }
         }
 
@@ -63,6 +79,7 @@ namespace UI
                     SetCanvasGroupState(startMenu, true);
                     SetCanvasGroupState(hudPanel, false);
                     SetCanvasGroupState(gameOverMenu, false);
+                    SetCanvasGroupState(pausePanel, false);
                     break;
 
                 case GameState.Playing:
@@ -70,18 +87,33 @@ namespace UI
                     SetCanvasGroupState(startMenu, false);
                     SetCanvasGroupState(hudPanel, true);
                     SetCanvasGroupState(gameOverMenu, false);
+                    SetCanvasGroupState(pausePanel, false);
                     break;
 
                 case GameState.GameOver:
                     Debug.Log("[UIManager] Entering GameOver block. Hiding HUD, initiating Delay Coroutine.");
                     SetCanvasGroupState(startMenu, false);
                     SetCanvasGroupState(hudPanel, false);
+
+                    UpdateGameOverScores();
+
                     StartCoroutine(ShowGameOverMenuWithDelay());
                     break;
 
                 case GameState.Paused:
+                    // Handled specifically by OnGamePaused/Resumed events.
                     break;
             }
+        }
+
+        private void HandleGamePaused()
+        {
+            SetCanvasGroupState(pausePanel, true);
+        }
+
+        private void HandleGameResumed()
+        {
+            SetCanvasGroupState(pausePanel, false);
         }
 
         /// <summary>
@@ -122,6 +154,55 @@ namespace UI
             group.blocksRaycasts = visible;
         }
 
+        /// <summary>
+        /// Updates the score text display.
+        /// </summary>
+        /// <param name="newScore">The new score value.</param>
+        private void UpdateScoreDisplay(int newScore)
+        {
+            if (scoreText != null)
+            {
+                scoreText.text = $"{newScore}m";
+            }
+        }
+
+        /// <summary>
+        /// Fetches the latest scores and updates the Game Over screen UI.
+        /// </summary>
+        private void UpdateGameOverScores()
+        {
+            ScoreManager scoreManager = ScoreManager.instance;
+            if (scoreManager != null)
+            {
+                int currentScore = scoreManager.CurrentScore;
+                int savedHighScore = scoreManager.SaveProfile != null ? scoreManager.SaveProfile.highScore : SaveSystem.Load<GameSaveData>().highScore;
+
+                int displayHighScore = currentScore > savedHighScore
+                                       ? currentScore
+                                       : savedHighScore;
+
+                if (currentScoreTextGameOver != null)
+                    currentScoreTextGameOver.text = $"Distance: {currentScore}m";
+
+                if (highScoreTextGameOver != null)
+                {
+                    highScoreTextGameOver.text = $"Best: {displayHighScore}m";
+
+                    // Visual Polish: New Record highlighting
+                    if (currentScore > 0 && currentScore >= savedHighScore)
+                    {
+                        // Gold color for new record
+                        highScoreTextGameOver.color = new Color(1f, 0.84f, 0f);
+                    }
+                    else
+                    {
+                        // Default white color
+                        highScoreTextGameOver.color = Color.white;
+                    }
+                }
+            }
+        }
+
         #region Button Event Handlers
 
         /// <summary>
@@ -130,9 +211,12 @@ namespace UI
         /// </summary>
         public void HandleStartButtonPressed()
         {
+            if (buttonClickClip != null)
+                GameEvents.RaisePlaySound(buttonClickClip, 0.6f);
+
             if (GameManager.Instance != null)
             {
-                GameManager.Instance.UpdateState(GameState.Playing);
+                GameManager.Instance.StartNewGame();
             }
         }
 
@@ -142,9 +226,51 @@ namespace UI
         /// </summary>
         public void HandleRestartButtonPressed()
         {
+            // Optional: You can add the button click sound here as well if you want consistency!
+            if (buttonClickClip != null) GameEvents.RaisePlaySound(buttonClickClip, 0.6f);
+
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.RestartGame();
+            }
+        }
+
+        /// <summary>
+        /// Toggles the pause state from the UI.
+        /// </summary>
+        public void HandlePauseButtonPressed()
+        {
+            if (buttonClickClip != null) GameEvents.RaisePlaySound(buttonClickClip, 0.6f);
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.TogglePause();
+            }
+        }
+
+        /// <summary>
+        /// Resumes the game from the UI.
+        /// </summary>
+        public void HandleResumeButtonPressed()
+        {
+            if (buttonClickClip != null) GameEvents.RaisePlaySound(buttonClickClip, 0.6f);
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.TogglePause();
+            }
+        }
+
+        /// <summary>
+        /// Returns to the Main Menu from the UI.
+        /// </summary>
+        public void HandleHomeButtonPressed()
+        {
+            if (buttonClickClip != null) GameEvents.RaisePlaySound(buttonClickClip, 0.6f);
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.ReturnToMainMenu();
             }
         }
 

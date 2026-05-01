@@ -8,10 +8,35 @@ namespace Features.Player.Scripts
     public class PlayerCollision : MonoBehaviour
     {
         [SerializeField] private PlayerStats _stats;
+        [Header("Audio")]
+        [SerializeField] private AudioClip deathClip;
+
         private bool _isGrounded;
+
+        // Future Shield Support
+        public bool IsInvulnerable { get; set; } = false;
 
         private void Awake()
         {
+        }
+
+        private void OnEnable()
+        {
+            GameEvents.OnPlayerDeath += HandleDeath;
+        }
+
+        private void OnDisable()
+        {
+            GameEvents.OnPlayerDeath -= HandleDeath;
+        }
+
+        private void HandleDeath()
+        {
+            if (deathClip != null)
+            {
+                GameEvents.RaisePlaySound(deathClip, 1f);
+            }
+            gameObject.SetActive(false);
         }
 
         private void OnCollisionEnter2D(Collision2D collision)

@@ -7,14 +7,14 @@ namespace Core
     {
         public static ObjectPoolManager Instance { get; private set; }
 
-        private Dictionary<int, Queue<GameObject>> _poolDictionary = new Dictionary<int, Queue<GameObject>>();
+        private Dictionary<EntityId, Queue<GameObject>> _poolDictionary = new Dictionary<EntityId, Queue<GameObject>>();
 
         private void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
-                // Removed DontDestroyOnLoad to ensure per-scene fresh start, avoiding stale references.
+                // Removed DontDestroyOnLoad to ensure per-scene fresh start, avoiding stale references
             }
             else
             {
@@ -40,9 +40,8 @@ namespace Core
                 return null;
             }
 
-            // Using GetInstanceID() is the native Unity way, replacing GetEntityId if it was a typo
-            int instanceId = prefab.GetInstanceID();
 
+            EntityId instanceId = prefab.GetEntityId();
             if (!_poolDictionary.ContainsKey(instanceId))
             {
                 _poolDictionary.Add(instanceId, new Queue<GameObject>());
@@ -52,7 +51,7 @@ namespace Core
             while (_poolDictionary[instanceId].Count > 0)
             {
                 GameObject objToSpawn = _poolDictionary[instanceId].Dequeue();
-                
+
                 // If it's not null, it's safe to use
                 if (objToSpawn != null)
                 {
@@ -100,6 +99,6 @@ namespace Core
     // Helper component attached dynamically to spawned objects
     public class PooledObject : MonoBehaviour
     {
-        public int PrefabId { get; set; }
+        public EntityId PrefabId { get; set; }
     }
 }
