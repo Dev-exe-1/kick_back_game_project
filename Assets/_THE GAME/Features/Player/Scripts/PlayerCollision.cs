@@ -13,7 +13,6 @@ namespace Features.Player.Scripts
 
         private bool _isGrounded;
 
-        // Future Shield Support
         public bool IsInvulnerable { get; set; } = false;
 
         private void Awake()
@@ -23,11 +22,20 @@ namespace Features.Player.Scripts
         private void OnEnable()
         {
             GameEvents.OnPlayerDeath += HandleDeath;
+            GameEvents.OnGameReset += HandleGameReset;
         }
 
         private void OnDisable()
         {
             GameEvents.OnPlayerDeath -= HandleDeath;
+            GameEvents.OnGameReset -= HandleGameReset;
+        }
+
+        private void HandleGameReset()
+        {
+            // Unparent player on game reset to avoid moving platform offset issues.
+            transform.SetParent(null);
+            transform.localScale = Vector3.one;
         }
 
         private void HandleDeath()
@@ -66,9 +74,7 @@ namespace Features.Player.Scripts
 
         private void OnTriggerEnter2D(Collider2D collider)
         {
-            // IPowerUp check
-            IPowerUp powerUp = collider.GetComponent<IPowerUp>();
-            if (powerUp != null)
+            if (collider.TryGetComponent<IPowerUp>(out var powerUp))
             {
                 powerUp.Apply(gameObject);
                 return;

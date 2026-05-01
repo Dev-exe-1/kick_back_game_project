@@ -2,10 +2,7 @@ using UnityEngine;
 
 namespace Core
 {
-    /// <summary>
-    /// Tracks the player's height to calculate the score.
-    /// Follows clean architecture by depending on GameState and raising events when the score changes.
-    /// </summary>
+    /// <summary>Tracks player height to calculate score.</summary>
     [DefaultExecutionOrder(-50)]
     public class ScoreManager : MonoBehaviour
     {
@@ -45,13 +42,11 @@ namespace Core
 
         private void HandlePlayerHeightChanged(int height)
         {
-            // State-Gate: Calculate score only while playing
             if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Playing)
             {
-                // Height-based scoring: Mathf.Max ensures it only represents the highest point reached
+                // Use Max to track only the highest point reached.
                 int calculatedScore = Mathf.Max(0, height);
 
-                // Only update and raise event if the score actually increased
                 if (calculatedScore > currentScore)
                 {
                     currentScore = calculatedScore;
@@ -71,7 +66,6 @@ namespace Core
                 }
             }
 
-            // Reset score to 0 when the game transitions back to the Main Menu
             if (state == GameState.MainMenu)
             {
                 ResetScore();
@@ -84,6 +78,14 @@ namespace Core
             {
                 currentScore = 0;
                 GameEvents.RaiseScoreChanged(currentScore);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (instance == this)
+            {
+                instance = null;
             }
         }
     }

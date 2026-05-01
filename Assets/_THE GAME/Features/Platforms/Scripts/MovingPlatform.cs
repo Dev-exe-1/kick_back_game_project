@@ -1,4 +1,5 @@
 using UnityEngine;
+using Features.Player.Scripts;
 
 namespace Features.Platforms.Scripts
 {
@@ -57,7 +58,7 @@ namespace Features.Platforms.Scripts
 
         private void OnCollisionExit2D(Collision2D collision)
         {
-            if (collision.gameObject.CompareTag("Player"))
+            if (collision.gameObject.TryGetComponent<PlayerCollision>(out _))
             {
 
                 collision.transform.SetParent(null);

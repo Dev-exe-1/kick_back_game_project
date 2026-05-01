@@ -3,10 +3,7 @@ using Core;
 
 namespace Features.Hazards
 {
-    /// <summary>
-    /// Generic movement script that scales with global difficulty.
-    /// Can be applied to platforms, enemies, or lasers.
-    /// </summary>
+    /// <summary>Generic movement script that scales with global difficulty.</summary>
     public class MovingHazard : MonoBehaviour
     {
         [Tooltip("The local direction this hazard moves.")]
@@ -17,7 +14,6 @@ namespace Features.Hazards
 
         private void Update()
         {
-            // Zero-Dependency: Reads the static GlobalSpeedMultiplier directly.
             float currentSpeed = individualBaseSpeed * DifficultyManager.GlobalSpeedMultiplier;
             transform.Translate(direction.normalized * currentSpeed * Time.deltaTime);
         }

@@ -2,18 +2,13 @@ using UnityEngine;
 
 namespace Features.LevelGenerator.Scripts
 {
-    /// <summary>
-    /// Represents a single piece of the infinite level.
-    /// Holds a reference to the EndPoint where the next chunk will be connected.
-    /// </summary>
+    /// <summary>Represents a single piece of the infinite level.</summary>
     public class LevelChunk : MonoBehaviour
     {
         [Tooltip("The Transform representing the top/end of this chunk where the next one will snap.")]
         [SerializeField] private Transform _endPoint;
 
-        /// <summary>
-        /// The Transform representing where the next chunk should spawn to connect seamlessly.
-        /// </summary>
+        /// <summary>Transform where the next chunk connects.</summary>
         public Transform EndPoint => _endPoint;
     }
 }

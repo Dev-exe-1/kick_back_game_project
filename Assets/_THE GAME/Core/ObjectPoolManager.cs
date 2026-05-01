@@ -14,7 +14,7 @@ namespace Core
             if (Instance == null)
             {
                 Instance = this;
-                // Removed DontDestroyOnLoad to ensure per-scene fresh start, avoiding stale references
+                // Removed DontDestroyOnLoad to avoid stale references.
             }
             else
             {
@@ -24,7 +24,7 @@ namespace Core
 
         private void OnDestroy()
         {
-            // Crucial: Clear dictionary to avoid holding onto destroyed scene objects
+            // Clear dictionary to avoid holding destroyed scene objects.
             if (Instance == this)
             {
                 _poolDictionary.Clear();
@@ -47,12 +47,10 @@ namespace Core
                 _poolDictionary.Add(instanceId, new Queue<GameObject>());
             }
 
-            // Cleanly handle MissingReferenceException by discarding destroyed (null) objects
             while (_poolDictionary[instanceId].Count > 0)
             {
                 GameObject objToSpawn = _poolDictionary[instanceId].Dequeue();
 
-                // If it's not null, it's safe to use
                 if (objToSpawn != null)
                 {
                     objToSpawn.transform.position = position;
@@ -62,10 +60,8 @@ namespace Core
                 }
             }
 
-            // If queue was empty or only contained nulls, instantiate a new one
             GameObject newObj = Instantiate(prefab, position, rotation);
 
-            // Add a helper component to know which pool it belongs to when returning
             PooledObject pooledObj = newObj.AddComponent<PooledObject>();
             pooledObj.PrefabId = instanceId;
 
@@ -96,7 +92,6 @@ namespace Core
         }
     }
 
-    // Helper component attached dynamically to spawned objects
     public class PooledObject : MonoBehaviour
     {
         public EntityId PrefabId { get; set; }

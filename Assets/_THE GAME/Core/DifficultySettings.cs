@@ -2,10 +2,7 @@ using UnityEngine;
 
 namespace Core
 {
-    /// <summary>
-    /// ScriptableObject defining the difficulty scaling parameters.
-    /// Allows designers to tune the "feel" from a single asset.
-    /// </summary>
+    /// <summary>ScriptableObject defining difficulty scaling parameters.</summary>
     [CreateAssetMenu(fileName = "DifficultySettings", menuName = "KickBack/Difficulty Settings")]
     public class DifficultySettings : ScriptableObject
     {

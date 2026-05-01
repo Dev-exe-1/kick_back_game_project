@@ -3,8 +3,6 @@ using Core;
 using Features.Player.Data;
 using Features.Weapons.Data;
 using Features.Weapons.Scripts;
-using UnityEngine.EventSystems;
-using System.Collections.Generic;
 
 namespace Features.Player.Scripts
 {
@@ -17,6 +15,9 @@ namespace Features.Player.Scripts
         [SerializeField] private AudioClip shootClip;
 
         private bool _canShoot = true;
+        private bool _isGrounded = true;
+        private float _softlockGraceTimer = 0f;
+        private GameObject _currentProjectile;
         private Vector2 _currentAimDirection;
         private Collider2D _playerCollider;
 
@@ -30,6 +31,7 @@ namespace Features.Player.Scripts
             PlayerEvents.OnAim += UpdateAimDirection;
             PlayerEvents.OnTryShoot += TryShoot;
             PlayerEvents.OnGrounded += ResetCanShoot;
+            PlayerEvents.OnAirborne += HandleAirborne;
         }
 
         private void OnDisable()
@@ -37,6 +39,25 @@ namespace Features.Player.Scripts
             PlayerEvents.OnAim -= UpdateAimDirection;
             PlayerEvents.OnTryShoot -= TryShoot;
             PlayerEvents.OnGrounded -= ResetCanShoot;
+            PlayerEvents.OnAirborne -= HandleAirborne;
+        }
+
+        private void Update()
+        {
+            if (_softlockGraceTimer > 0f)
+            {
+                _softlockGraceTimer -= Time.deltaTime;
+                return;
+            }
+
+            // Detect softlock: player is stuck on ground with no ammo and no active bullet.
+            if (!_canShoot && _isGrounded)
+            {
+                if (_currentProjectile == null || !_currentProjectile.activeInHierarchy)
+                {
+                    GameEvents.RaisePlayerDeath();
+                }
+            }
         }
 
         private void UpdateAimDirection(Vector2 aimDir)
@@ -46,25 +67,11 @@ namespace Features.Player.Scripts
 
         private void TryShoot()
         {
-
-            if (IsClickingUI()) return;
-
             if (_canShoot)
             {
                 Shoot();
             }
         }
-        private bool IsClickingUI()
-        {
-            PointerEventData eventData = new PointerEventData(EventSystem.current);
-            eventData.position = Input.mousePosition;
-            List<RaycastResult> results = new List<RaycastResult>();
-
-            EventSystem.current.RaycastAll(eventData, results);
-
-            return results.Count > 0;
-        }
-
 
         private void Shoot()
         {
@@ -74,8 +81,8 @@ namespace Features.Player.Scripts
                 GameEvents.RaisePlaySound(shootClip, 0.8f);
             }
 
-
             _canShoot = false;
+            _softlockGraceTimer = 0.25f;
 
             if (_projectileData != null && _projectileData.prefab != null && _firePoint != null)
             {
@@ -84,6 +91,8 @@ namespace Features.Player.Scripts
                     _firePoint.position,
                     Quaternion.identity
                 );
+
+                _currentProjectile = bulletObj;
 
                 bulletObj.transform.up = _currentAimDirection;
 
@@ -94,7 +103,6 @@ namespace Features.Player.Scripts
                 }
             }
 
-            // Apply Recoil (Opposite of aim)
             Vector2 recoilDirection = -_currentAimDirection.normalized;
             PlayerEvents.RaiseRecoilApplied(recoilDirection);
         }
@@ -102,6 +110,12 @@ namespace Features.Player.Scripts
         private void ResetCanShoot()
         {
             _canShoot = true;
+            _isGrounded = true;
+        }
+
+        private void HandleAirborne()
+        {
+            _isGrounded = false;
         }
     }
 }

@@ -14,11 +14,7 @@ namespace Features.VFX.Scripts
         public GameObject prefab;
     }
 
-    /// <summary>
-    /// Acts as the Visual Brain for the game.
-    /// Listens for impact events and translates them into physical particle spawns 
-    /// using Object Pooling to guarantee zero-allocation performance during gameplay.
-    /// </summary>
+    /// <summary>Listens for impact events and spawns pooled particles.</summary>
     public class EffectManager : MonoBehaviour
     {
         [SerializeField] private List<EffectMapping> _effectMappings;
@@ -28,7 +24,7 @@ namespace Features.VFX.Scripts
         {
             _effectDictionary = new Dictionary<ImpactType, GameObject>();
             
-            // Build dictionary for O(1) lookups
+            // Build dictionary for O(1) lookups.
             if (_effectMappings != null)
             {
                 foreach (var mapping in _effectMappings)

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DefaultPlayer
   m_EditorClassIdentifier: Assembly-CSharp::Features.Player.Data.PlayerStats
   recoilForce: 12.5
-  maxAirShots: 1
+  maxAirShots: 5
   groundLayer:
     serializedVersion: 2
     m_Bits: 64

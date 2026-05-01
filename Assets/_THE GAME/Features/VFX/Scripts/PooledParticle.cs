@@ -3,17 +3,40 @@ using Core;
 
 namespace Features.VFX.Scripts
 {
-    /// <summary>
-    /// A lightweight memory guard for Particle Systems.
-    /// Returns the GameObject to the ObjectPoolManager once the particle simulation stops.
-    /// IMPORTANT: The ParticleSystem's 'Stop Action' must be set to 'Callback' in the Unity Inspector!
-    /// </summary>
+    /// <summary>Returns particle systems to the pool after simulation stops.</summary>
     [RequireComponent(typeof(ParticleSystem))]
     public class PooledParticle : MonoBehaviour
     {
+        private ParticleSystem _particleSystem;
+
+        private void Awake()
+        {
+            _particleSystem = GetComponent<ParticleSystem>();
+
+            // Enforce Stop Action to Callback to guarantee OnParticleSystemStopped triggers.
+            var main = _particleSystem.main;
+            main.stopAction = ParticleSystemStopAction.Callback;
+        }
+
+        private void OnEnable()
+        {
+            if (_particleSystem != null)
+            {
+                _particleSystem.Play(true);
+            }
+        }
+
         private void OnParticleSystemStopped()
         {
-            ObjectPoolManager.Instance.ReturnToPool(gameObject);
+            if (ObjectPoolManager.Instance != null)
+            {
+                ObjectPoolManager.Instance.ReturnToPool(gameObject);
+            }
+            else
+            {
+                // Fallback disable to prevent dangling objects if pool manager is destroyed.
+                gameObject.SetActive(false);
+            }
         }
     }
 }

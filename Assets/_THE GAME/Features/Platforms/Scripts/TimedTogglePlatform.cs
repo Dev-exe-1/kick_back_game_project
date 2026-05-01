@@ -56,11 +56,9 @@ namespace Features.Platforms.Scripts
                 float actualFlickerDuration = Mathf.Min(flickerWarningDuration, appearanceDuration * 0.5f);
                 float stableActiveDuration = appearanceDuration - actualFlickerDuration;
 
-                // --- 1. ACTIVE STATE ---
                 SetActiveState(true);
                 yield return new WaitForSeconds(stableActiveDuration);
 
-                // --- 2. FLICKER WARNING ---
                 float flickerTimer = 0f;
                 bool isVisible = true;
                 
@@ -72,7 +70,6 @@ namespace Features.Platforms.Scripts
                     flickerTimer += flickerInterval;
                 }
 
-                // --- 3. INACTIVE STATE ---
                 SetActiveState(false);
                 yield return new WaitForSeconds(disappearanceDuration);
             }
@@ -84,6 +81,6 @@ namespace Features.Platforms.Scripts
             if (_collider != null) _collider.enabled = isActive;
         }
 
-        public void OnLanded(GameObject player) { /* IGroundable Implementation */ }
+        public void OnLanded(GameObject player) { }
     }
 }

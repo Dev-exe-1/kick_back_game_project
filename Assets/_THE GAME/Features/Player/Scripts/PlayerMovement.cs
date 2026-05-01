@@ -28,7 +28,7 @@ namespace Features.Player.Scripts
         {
             if (_stats == null) return;
             
-            // Reset velocity before applying impulse for consistent game feel
+            // Reset velocity before applying impulse for consistent game feel.
             _rb.linearVelocity = Vector2.zero; 
             _rb.AddForce(direction * _stats.recoilForce, ForceMode2D.Impulse);
         }

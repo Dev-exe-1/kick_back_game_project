@@ -4,10 +4,7 @@ using Core;
 
 namespace Features.LevelGenerator.Scripts
 {
-    /// <summary>
-    /// Manages the infinite generation and pooling of vertical level chunks.
-    /// Ensures seamless snapping and memory-efficient recycling.
-    /// </summary>
+    /// <summary>Manages infinite generation and pooling of vertical level chunks.</summary>
     public class LevelGenerator : MonoBehaviour
     {
         [Header("Chunk Configurations")]
@@ -41,7 +38,6 @@ namespace Features.LevelGenerator.Scripts
                 return;
             }
 
-            // 1. Spawning Logic: Handle manual initial chunk or spawn from prefab
             if (_initialChunk != null)
             {
                 _activeChunks.Enqueue(_initialChunk.gameObject);
@@ -52,7 +48,6 @@ namespace Features.LevelGenerator.Scripts
                 SpawnSpecificChunk(0);
             }
 
-            // 2. Spawn initial random chunks ahead of the player
             int chunksToSpawn = _initialChunk != null ? _initialChunksToSpawn : _initialChunksToSpawn - 1;
             for (int i = 0; i < chunksToSpawn; i++)
             {
@@ -69,44 +64,37 @@ namespace Features.LevelGenerator.Scripts
             ManageChunkRecycling();
         }
 
-        /// <summary>
-        /// Checks if the player is getting close to the highest spawned chunk and requests a new one.
-        /// </summary>
+        /// <summary>Checks if the player is near highest chunk to request new one.</summary>
         private void ManageChunkSpawning()
         {
             float checkY = _lastSpawnedChunk != null && _lastSpawnedChunk.EndPoint != null ? _lastSpawnedChunk.EndPoint.position.y : 0f;
             
-            // If the distance between player and the next spawn point is less than threshold, spawn more
             if (checkY - _playerTransform.position.y < _spawnThreshold)
             {
                 SpawnRandomChunk();
             }
         }
 
-        /// <summary>
-        /// Checks the oldest active chunk and recycles it if it falls below the despawn threshold.
-        /// </summary>
+        /// <summary>Recycles oldest chunk if below despawn threshold.</summary>
         private void ManageChunkRecycling()
         {
             if (_activeChunks.Count == 0) return;
 
             GameObject oldestChunk = _activeChunks.Peek();
             
-            // Check distance from player to the origin of the oldest chunk
             if (_playerTransform.position.y - oldestChunk.transform.position.y > _despawnThreshold)
             {
-                // Memory Management: Remove from tracking queue
                 oldestChunk = _activeChunks.Dequeue();
 
-                // If it's a manually placed scene object, destroy it. Otherwise, pool it.
+                // Handle manual scene objects vs pooled objects.
                 if (oldestChunk.GetComponent<PooledObject>() != null)
                 {
                     ObjectPoolManager.Instance.ReturnToPool(oldestChunk);
                 }
                 else
                 {
-                    // Ensure we only destroy objects that exist in a scene, not in the project folders
-                    if (oldestChunk.scene.name != null)
+                    // Only destroy instantiated scene objects.
+                    if (oldestChunk.scene.IsValid())
                     {
                         Destroy(oldestChunk);
                     }
@@ -114,29 +102,23 @@ namespace Features.LevelGenerator.Scripts
             }
         }
 
-        /// <summary>
-        /// Helper to spawn a specific chunk by its list index.
-        /// </summary>
+        /// <summary>Spawns specific chunk by index.</summary>
         private void SpawnSpecificChunk(int index)
         {
             if (index < 0 || index >= _chunkPrefabs.Count) return;
             SpawnChunk(_chunkPrefabs[index]);
         }
 
-        /// <summary>
-        /// Spawns a random chunk, strictly excluding the starter chunk (Index 0).
-        /// </summary>
+        /// <summary>Spawns random chunk excluding starter.</summary>
         private void SpawnRandomChunk()
         {
-            if (_chunkPrefabs.Count <= 1) return; // Only starter chunk exists
+            if (_chunkPrefabs.Count <= 1) return;
 
             int randomIndex = Random.Range(1, _chunkPrefabs.Count);
             SpawnChunk(_chunkPrefabs[randomIndex]);
         }
 
-        /// <summary>
-        /// Handles the dependency injection (via ObjectPool), snapping connectivity, and queue tracking.
-        /// </summary>
+        /// <summary>Handles dependency injection and snapping.</summary>
         private void SpawnChunk(GameObject prefab)
         {
             Vector3 spawnPos = Vector3.zero;
@@ -150,17 +132,14 @@ namespace Features.LevelGenerator.Scripts
                 else
                 {
                     Debug.LogWarning($"Chunk {_lastSpawnedChunk.name} has no EndPoint! Snapping may fail.");
-                    spawnPos = _lastSpawnedChunk.transform.position + Vector3.up * 10f; // Fallback
+                    spawnPos = _lastSpawnedChunk.transform.position + Vector3.up * 10f;
                 }
             }
 
-            // Dependency Injection: Fetch chunk from ObjectPoolManager instead of instantiating
             GameObject newChunkObj = ObjectPoolManager.Instance.GetFromPool(prefab, spawnPos, Quaternion.identity);
             
-            // Memory Management tracking
             _activeChunks.Enqueue(newChunkObj);
 
-            // Update tracking for the next spawn
             LevelChunk levelChunk = newChunkObj.GetComponent<LevelChunk>();
             if (levelChunk != null)
             {

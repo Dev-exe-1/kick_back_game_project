@@ -4,10 +4,7 @@ using Core; // To access GameManager and GameState
 using TMPro;
 namespace UI
 {
-    /// <summary>
-    /// Manages all UI transitions and interactions.
-    /// Acts as a pure listener to the GameManager and other event systems, maintaining decoupling.
-    /// </summary>
+    /// <summary>Manages UI transitions and interactions.</summary>
     public class UIManager : MonoBehaviour
     {
         [Header("UI Panels (CanvasGroups)")]
@@ -30,7 +27,6 @@ namespace UI
 
         private void OnEnable()
         {
-            // Subscribe to global state changes
             GameManager.OnStateChanged += HandleGameStateChanged;
             GameEvents.OnScoreChanged += UpdateScoreDisplay;
             GameEvents.OnGamePaused += HandleGamePaused;
@@ -39,7 +35,7 @@ namespace UI
 
         private void OnDisable()
         {
-            // Always unsubscribe to prevent memory leaks!
+            // Unsubscribe to prevent memory leaks.
             GameManager.OnStateChanged -= HandleGameStateChanged;
             GameEvents.OnScoreChanged -= UpdateScoreDisplay;
             GameEvents.OnGamePaused -= HandleGamePaused;
@@ -48,7 +44,6 @@ namespace UI
 
         private void Start()
         {
-            // Ensure UI is immediately synchronized with the actual GameState
             if (GameManager.Instance != null)
             {
                 Debug.Log($"[UIManager] Start() Polling GameManager. Found State: {GameManager.Instance.CurrentState}");
@@ -56,7 +51,7 @@ namespace UI
             }
             else
             {
-                // Fallback for isolated UI testing
+                // Fallback for isolated UI testing.
                 Debug.LogWarning("[UIManager] Start() - No GameManager found. Defaulting to MainMenu isolated state.");
                 SetCanvasGroupState(startMenu, true);
                 SetCanvasGroupState(hudPanel, false);
@@ -65,10 +60,7 @@ namespace UI
             }
         }
 
-        /// <summary>
-        /// Pure listener method reacting to GameState changes.
-        /// </summary>
-        /// <param name="newState">The new state provided by the GameManager.</param>
+        /// <summary>Reacts to GameState changes.</summary>
         private void HandleGameStateChanged(GameState newState)
         {
             Debug.Log($"[UIManager] HandleGameStateChanged triggered for state: {newState}");
@@ -101,7 +93,6 @@ namespace UI
                     break;
 
                 case GameState.Paused:
-                    // Handled specifically by OnGamePaused/Resumed events.
                     break;
             }
         }
@@ -116,23 +107,17 @@ namespace UI
             SetCanvasGroupState(pausePanel, false);
         }
 
-        /// <summary>
-        /// Displays the game over menu after a brief delay for better UX.
-        /// </summary>
+        /// <summary>Displays the game over menu after a brief delay.</summary>
         private IEnumerator ShowGameOverMenuWithDelay()
         {
             Debug.Log($"[UIManager] ShowGameOverMenuWithDelay Started. Waiting {gameOverDelay} realtime seconds...");
-            // Use WaitForSecondsRealtime in case time scale was set to 0 by the GameManager
+            // Use WaitForSecondsRealtime in case time scale was set to 0.
             yield return new WaitForSecondsRealtime(gameOverDelay);
             Debug.Log("[UIManager] Delay complete. Showing GameOver Panel.");
             SetCanvasGroupState(gameOverMenu, true);
         }
 
-        /// <summary>
-        /// Helper to handle CanvasGroup visibility and interaction cleanly.
-        /// </summary>
-        /// <param name="group">Target CanvasGroup.</param>
-        /// <param name="visible">True to show and enable interactions, false to hide and disable.</param>
+        /// <summary>Handles CanvasGroup visibility and interaction cleanly.</summary>
         private void SetCanvasGroupState(CanvasGroup group, bool visible)
         {
             if (group == null)
@@ -141,8 +126,7 @@ namespace UI
                 return;
             }
 
-            // ROBUSTNESS FIX: If the GameObject was hard-disabled in the editor,
-            // CanvasGroup changes won't render. Ensure it's active.
+            // If the GameObject was disabled in the editor, CanvasGroup changes won't render. Ensure it's active.
             if (visible && !group.gameObject.activeSelf)
             {
                 Debug.Log($"[UIManager] CanvasGroup {group.gameObject.name} was disabled in hierarchy. Activating GameObject.");
@@ -154,10 +138,7 @@ namespace UI
             group.blocksRaycasts = visible;
         }
 
-        /// <summary>
-        /// Updates the score text display.
-        /// </summary>
-        /// <param name="newScore">The new score value.</param>
+        /// <summary>Updates the score text display.</summary>
         private void UpdateScoreDisplay(int newScore)
         {
             if (scoreText != null)
@@ -166,9 +147,7 @@ namespace UI
             }
         }
 
-        /// <summary>
-        /// Fetches the latest scores and updates the Game Over screen UI.
-        /// </summary>
+        /// <summary>Updates the Game Over screen UI.</summary>
         private void UpdateGameOverScores()
         {
             ScoreManager scoreManager = ScoreManager.instance;
@@ -188,15 +167,12 @@ namespace UI
                 {
                     highScoreTextGameOver.text = $"Best: {displayHighScore}m";
 
-                    // Visual Polish: New Record highlighting
                     if (currentScore > 0 && currentScore >= savedHighScore)
                     {
-                        // Gold color for new record
                         highScoreTextGameOver.color = new Color(1f, 0.84f, 0f);
                     }
                     else
                     {
-                        // Default white color
                         highScoreTextGameOver.color = Color.white;
                     }
                 }
@@ -205,10 +181,7 @@ namespace UI
 
         #region Button Event Handlers
 
-        /// <summary>
-        /// Called from the UI Button's OnClick event.
-        /// Directs the flow cleanly to the GameManager.
-        /// </summary>
+        /// <summary>Handles Start Button press.</summary>
         public void HandleStartButtonPressed()
         {
             if (buttonClickClip != null)
@@ -220,13 +193,9 @@ namespace UI
             }
         }
 
-        /// <summary>
-        /// Called from the UI Button's OnClick event.
-        /// Requests a complete restart from the GameManager.
-        /// </summary>
+        /// <summary>Handles Restart Button press.</summary>
         public void HandleRestartButtonPressed()
         {
-            // Optional: You can add the button click sound here as well if you want consistency!
             if (buttonClickClip != null) GameEvents.RaisePlaySound(buttonClickClip, 0.6f);
 
             if (GameManager.Instance != null)
@@ -235,9 +204,7 @@ namespace UI
             }
         }
 
-        /// <summary>
-        /// Toggles the pause state from the UI.
-        /// </summary>
+        /// <summary>Handles Pause Button press.</summary>
         public void HandlePauseButtonPressed()
         {
             if (buttonClickClip != null) GameEvents.RaisePlaySound(buttonClickClip, 0.6f);
@@ -248,9 +215,7 @@ namespace UI
             }
         }
 
-        /// <summary>
-        /// Resumes the game from the UI.
-        /// </summary>
+        /// <summary>Handles Resume Button press.</summary>
         public void HandleResumeButtonPressed()
         {
             if (buttonClickClip != null) GameEvents.RaisePlaySound(buttonClickClip, 0.6f);
@@ -261,9 +226,7 @@ namespace UI
             }
         }
 
-        /// <summary>
-        /// Returns to the Main Menu from the UI.
-        /// </summary>
+        /// <summary>Handles Home Button press.</summary>
         public void HandleHomeButtonPressed()
         {
             if (buttonClickClip != null) GameEvents.RaisePlaySound(buttonClickClip, 0.6f);
@@ -273,6 +236,15 @@ namespace UI
                 GameManager.Instance.ReturnToMainMenu();
             }
         }
+
+        /// <summary>Handles Exit Button press.</summary>
+        public void HandleExitButtonPressed()
+        {
+            if (buttonClickClip != null) GameEvents.RaisePlaySound(buttonClickClip, 0.6f);
+
+            Application.Quit();
+        }
+
 
         #endregion
     }

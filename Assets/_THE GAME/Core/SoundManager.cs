@@ -3,10 +3,7 @@ using UnityEngine;
 
 namespace Core
 {
-    /// <summary>
-    /// A robust Singleton manager to handle game audio independently of specific scripts.
-    /// Uses GameEvents to listen for sound requests, reducing tight coupling.
-    /// </summary>
+    /// <summary>Singleton manager for independent audio handling.</summary>
     public class SoundManager : MonoBehaviour
     {
         public static SoundManager Instance { get; private set; }
@@ -20,13 +17,11 @@ namespace Core
 
         private void Awake()
         {
-            // Singleton implementation with DontDestroyOnLoad
             if (Instance == null)
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
                 
-                // Optional robustness: dynamically add components if missing
                 if (musicSource == null)
                 {
                     musicSource = gameObject.AddComponent<AudioSource>();
@@ -46,21 +41,16 @@ namespace Core
 
         private void OnEnable()
         {
-            // Subscribe to the decoupled sound event
             GameEvents.OnPlaySound += HandlePlaySound;
         }
 
         private void OnDisable()
         {
-            // Always unsubscribe to prevent memory leaks
+            // Unsubscribe to prevent memory leaks.
             GameEvents.OnPlaySound -= HandlePlaySound;
         }
 
-        /// <summary>
-        /// Plays a sound effect via the static event.
-        /// </summary>
-        /// <param name="clip">The AudioClip to play.</param>
-        /// <param name="volume">The volume level (0.0 to 1.0).</param>
+        /// <summary>Plays a sound effect.</summary>
         private void HandlePlaySound(AudioClip clip, float volume)
         {
             if (clip != null)
@@ -73,11 +63,7 @@ namespace Core
             }
         }
 
-        /// <summary>
-        /// Fades into a new background music track smoothly.
-        /// </summary>
-        /// <param name="newClip">The new AudioClip to loop.</param>
-        /// <param name="fadeDuration">Duration of the crossfade in seconds.</param>
+        /// <summary>Fades smoothly into a new background music track.</summary>
         public void PlayMusic(AudioClip newClip, float fadeDuration = 1.0f)
         {
             if (newClip == null)
@@ -86,7 +72,6 @@ namespace Core
                 return;
             }
 
-            // Prevent restarting the track if it's already playing
             if (musicSource.clip == newClip && musicSource.isPlaying)
             {
                 return;
@@ -97,28 +82,25 @@ namespace Core
 
         private IEnumerator FadeMusicCoroutine(AudioClip newClip, float fadeDuration)
         {
-            float targetVolume = 1f; // Modify this if your music source max volume should be lower
+            float targetVolume = 1f; 
             
-            // Fade out the current track if it's playing
             if (musicSource.isPlaying && musicSource.clip != null)
             {
                 float startVolume = musicSource.volume;
                 while (musicSource.volume > 0)
                 {
-                    // Use unscaledDeltaTime to ensure fading works even if the game is paused
+                    // Use unscaledDeltaTime to allow fading while paused.
                     musicSource.volume -= startVolume * (Time.unscaledDeltaTime / fadeDuration);
                     yield return null;
                 }
                 musicSource.Stop();
             }
 
-            // Prepare and play the new track
             musicSource.clip = newClip;
             musicSource.loop = true;
             musicSource.volume = 0f;
             musicSource.Play();
 
-            // Fade in the new track
             while (musicSource.volume < targetVolume)
             {
                 musicSource.volume += targetVolume * (Time.unscaledDeltaTime / fadeDuration);

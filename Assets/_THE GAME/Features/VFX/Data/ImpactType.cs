@@ -4,6 +4,8 @@ namespace Features.VFX.Data
     {
         DefaultBullet,
         EnemyDeath,
-        Environment
+        Environment,
+        Landing,
+        Jump
     }
 }
